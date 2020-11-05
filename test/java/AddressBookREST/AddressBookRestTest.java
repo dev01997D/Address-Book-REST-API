@@ -1,5 +1,6 @@
 package AddressBookREST;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
@@ -14,6 +15,7 @@ import com.google.gson.Gson;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 
 public class AddressBookRestTest {
 	private static Logger log = Logger.getLogger(AddressBookRestTest.class.getName());
@@ -24,6 +26,14 @@ public class AddressBookRestTest {
 		log.info("Contact entries in JSON Server :\n" + response.asString());
 		Contact[] arrayOfEmps = new Gson().fromJson(response.asString(), Contact[].class);
 		return arrayOfEmps;
+	}
+
+	private Response addContactToJSONServer(Contact contactData) {
+		String contactJSON = new Gson().toJson(contactData);
+		RequestSpecification request = RestAssured.given();
+		request.header("Content-Type", "application/json");
+		request.body(contactJSON);
+		return request.post("/contacts");
 	}
 
 	@Before
@@ -38,5 +48,20 @@ public class AddressBookRestTest {
 		addressBookService = new AddressBookRestMain(Arrays.asList(arrayOfContacts));
 		long entries = addressBookService.countEntries(IOService.REST_IO);
 		Assert.assertEquals(6, entries);
+	}
+	
+	@Test
+	public void givenNewEmployee_WhenAddedInJsonServer_ShouldMatchResponseAndCount() {
+		Contact[] arrayOfEmps = getContactList();
+		addressBookService = new AddressBookRestMain(Arrays.asList(arrayOfEmps));
+		Contact contactData = new Contact(0, "Mark ZukerBerg", "M", 3000000, LocalDate.now());
+		Response response = addContactToJSONServer(contactData);
+		int statusCode = response.getStatusCode();
+		Assert.assertEquals(201, statusCode);
+		
+		contactData = new Gson().fromJson(response.asString(), Contact.class);
+		addressBookService.addContactToAddressBook(contactData, IOService.REST_IO);
+		long entries = addressBookService.countEntries(IOService.REST_IO);
+		Assert.assertEquals(7, entries);
 	}
 }

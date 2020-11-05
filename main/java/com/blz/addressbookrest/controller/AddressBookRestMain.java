@@ -29,5 +29,6 @@ public class AddressBookRestMain {
 
 	public void addContactToAddressBook(Contact contactData, IOService restIo) {
 		contactList.add(contactData);
+		System.out.println(contactList.size());
 	}
 }
