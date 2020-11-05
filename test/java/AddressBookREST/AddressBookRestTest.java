@@ -36,6 +36,16 @@ public class AddressBookRestTest {
 		return request.post("/contacts");
 	}
 
+	private int updateSalaryToJSONServer(Contact contactData) {
+		String contactJSON = new Gson().toJson(contactData);
+		RequestSpecification request = RestAssured.given();
+		request.header("Content-Type", "application/json");
+		request.body(contactJSON);
+		Response response = request.put("/contacts/" + contactData.id);
+
+		return response.getStatusCode();
+	}
+
 	@Before
 	public void setUp() {
 		RestAssured.baseURI = "http://localhost";
@@ -47,9 +57,19 @@ public class AddressBookRestTest {
 		Contact[] arrayOfContacts = getContactList();
 		addressBookService = new AddressBookRestMain(Arrays.asList(arrayOfContacts));
 		long entries = addressBookService.countEntries(IOService.REST_IO);
-		Assert.assertEquals(6, entries);
+		Assert.assertEquals(10, entries);
 	}
-	
+
+	@Test
+	public void givenEmployeeData_WhenUpdatedInJSONServer_ShouldSyncWithList() {
+		Contact[] arrayOfContacts = getContactList();
+		addressBookService = new AddressBookRestMain(Arrays.asList(arrayOfContacts));
+		addressBookService.updateContactSalary("DevS", 4000000.00, IOService.REST_IO);
+		Contact contactData = addressBookService.getEmployeeData("DevS");
+		int statusCode = updateSalaryToJSONServer(contactData);
+		Assert.assertEquals(200, statusCode);
+	}
+
 	@Test
 	public void givenNewEmployee_WhenAddedInJsonServer_ShouldMatchResponseAndCount() {
 		Contact[] arrayOfEmps = getContactList();
