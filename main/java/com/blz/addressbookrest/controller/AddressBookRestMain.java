@@ -32,13 +32,18 @@ public class AddressBookRestMain {
 		System.out.println(contactList.size());
 	}
 
-	public Contact getEmployeeData(String name) {
+	public Contact getContactData(String name) {
 		return contactList.stream().filter(contact->contact.name.equalsIgnoreCase(name)).findFirst().orElse(null);
 	}
 
 	public void updateContactSalary(String name, double salary, IOService ioService) {
-		Contact contact=getEmployeeData(name);
+		Contact contact=getContactData(name);
 		if(contact!=null)
 			contact.salary=salary;
+	}
+
+	public void deleteContactData(String name, IOService ioService) {
+		Contact contactData=getContactData(name);
+		contactList.remove(contactData);
 	}
 }
