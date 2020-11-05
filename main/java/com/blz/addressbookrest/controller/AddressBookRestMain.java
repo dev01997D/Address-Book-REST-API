@@ -31,4 +31,14 @@ public class AddressBookRestMain {
 		contactList.add(contactData);
 		System.out.println(contactList.size());
 	}
+
+	public Contact getEmployeeData(String name) {
+		return contactList.stream().filter(contact->contact.name.equalsIgnoreCase(name)).findFirst().orElse(null);
+	}
+
+	public void updateContactSalary(String name, double salary, IOService ioService) {
+		Contact contact=getEmployeeData(name);
+		if(contact!=null)
+			contact.salary=salary;
+	}
 }
