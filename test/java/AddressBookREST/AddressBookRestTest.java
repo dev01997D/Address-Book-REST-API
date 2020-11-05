@@ -64,4 +64,22 @@ public class AddressBookRestTest {
 		long entries = addressBookService.countEntries(IOService.REST_IO);
 		Assert.assertEquals(7, entries);
 	}
+
+	@Test
+	public void givenListOfNewContacts_WhenAdded__ShouldMatchContactsCount() {
+		Contact[] arrayOfEmps = getContactList();
+		addressBookService = new AddressBookRestMain(Arrays.asList(arrayOfEmps));
+		Contact[] arrayOfContact = { new Contact(0, "DevS", "M", 1000000.00, LocalDate.of(2019, 8, 16)),
+				new Contact(0, "Kavya", "F", 2000000.00, LocalDate.of(2017, 11, 14)),
+				new Contact(0, "Jayesh", "M", 1000000.00, LocalDate.now()) };
+		for (Contact contactData : arrayOfContact) {
+			Response response = addContactToJSONServer(contactData);
+			int statusCode = response.getStatusCode();
+			Assert.assertEquals(201, statusCode);
+			contactData = new Gson().fromJson(response.asString(), Contact.class);
+			addressBookService.addContactToAddressBook(contactData, IOService.REST_IO);
+		}
+		long entries = addressBookService.countEntries(IOService.REST_IO);
+		Assert.assertEquals(10, entries);
+	}
 }
